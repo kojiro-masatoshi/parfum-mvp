@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { getPerfumeById } from "@/lib/db";
+import { themeOf } from "@/lib/scent-theme";
 
 interface Params {
   params: { id: string };
@@ -12,71 +13,149 @@ export default function PerfumeDetailPage({ params }: Params) {
   const perfume = getPerfumeById(params.id);
   if (!perfume) notFound();
 
+  const theme = themeOf(perfume.scent_family);
+
   return (
-    <main className="space-y-8 pt-4">
+    <div className="space-y-14 fade-up">
       <Link
         href="/result"
-        className="text-xs text-neutral-500 underline-offset-4 hover:underline"
+        className="font-garamond text-[11px] tracking-[0.3em] text-neutral-500 underline-offset-4 hover:underline"
       >
-        ← 結果に戻る
+        ← BACK TO SELECTION
       </Link>
 
-      <header className="space-y-2 border-b border-neutral-200 pb-6">
-        <p className="text-xs text-neutral-500">{perfume.brand}</p>
-        <h1 className="text-3xl font-light">{perfume.name}</h1>
-        <p className="text-xs text-neutral-500">
-          {perfume.scent_family} ／ {perfume.concentration} ／ 調香: {perfume.perfumer}
+      <section
+        className="relative overflow-hidden rounded-sm border border-[var(--rule)] px-8 py-14 text-center"
+        style={{
+          background: `linear-gradient(180deg, ${theme.tint} 0%, #ffffff 85%)`,
+        }}
+      >
+        <p
+          className="font-garamond text-[11px] tracking-[0.5em]"
+          style={{ color: theme.accent }}
+        >
+          {theme.label.toUpperCase()}
         </p>
-        <p className="text-sm text-neutral-700">
-          ¥{perfume.price_yen.toLocaleString()}
+        <p className="mt-4 font-garamond text-[10px] tracking-[0.4em] text-neutral-500">
+          {perfume.brand.toUpperCase()}
         </p>
-      </header>
+        <h1 className="mt-3 font-mincho text-3xl font-light leading-[1.4] sm:text-4xl">
+          {perfume.name}
+        </h1>
+        <div
+          className="mx-auto mt-6 h-px w-10"
+          style={{ background: theme.accent }}
+        />
+        <p className="mt-6 font-mincho text-sm italic leading-[2] text-neutral-600">
+          — {theme.poem}
+        </p>
+      </section>
 
-      <section className="space-y-3">
-        <h2 className="text-sm font-medium text-neutral-500">情景</h2>
-        <p className="text-base leading-relaxed text-neutral-800">
+      <section className="space-y-4 text-center">
+        <p className="font-garamond text-[10px] tracking-[0.4em] text-neutral-400">
+          SCENE
+        </p>
+        <p className="mx-auto max-w-md font-mincho text-base leading-[2.1] text-neutral-800">
           {perfume.description}
         </p>
       </section>
 
-      <section className="grid grid-cols-1 gap-6 sm:grid-cols-3">
-        <NoteBlock title="トップノート" notes={perfume.top_notes} />
-        <NoteBlock title="ミドルノート" notes={perfume.middle_notes} />
-        <NoteBlock title="ベースノート" notes={perfume.base_notes} />
+      <section className="space-y-6">
+        <div className="text-center">
+          <p className="font-garamond text-[10px] tracking-[0.4em] text-neutral-400">
+            NOTES
+          </p>
+        </div>
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
+          <NoteBlock title="Top" subtitle="トップ" notes={perfume.top_notes} accent={theme.accent} />
+          <NoteBlock title="Heart" subtitle="ミドル" notes={perfume.middle_notes} accent={theme.accent} />
+          <NoteBlock title="Base" subtitle="ベース" notes={perfume.base_notes} accent={theme.accent} />
+        </div>
       </section>
 
-      <section className="grid grid-cols-2 gap-4 rounded-md border border-neutral-200 p-5 text-sm">
-        <Meta title="香り立ち" value={renderBar(perfume.intensity)} />
-        <Meta title="持続力" value={renderBar(perfume.longevity)} />
-        <Meta title="相性シーン" value={perfume.scene_tags.join(" / ")} />
-        <Meta title="相性シーズン" value={perfume.season_tags.join(" / ")} />
+      <section className="grid grid-cols-2 gap-y-6 gap-x-10 border-y rule py-8 text-sm sm:grid-cols-4">
+        <Meta label="CONCENTRATION" value={perfume.concentration} />
+        <Meta label="PERFUMER" value={perfume.perfumer} />
+        <Meta label="SILLAGE" value={renderBar(perfume.intensity, theme.accent)} html />
+        <Meta label="LONGEVITY" value={renderBar(perfume.longevity, theme.accent)} html />
+        <Meta label="SCENE" value={perfume.scene_tags.join(" / ")} />
+        <Meta label="SEASON" value={perfume.season_tags.join(" / ")} />
+        <Meta label="PRICE" value={`¥${perfume.price_yen.toLocaleString()}`} />
+        <Meta label="FAMILY" value={perfume.scent_family} />
       </section>
-    </main>
+    </div>
   );
 }
 
-function NoteBlock({ title, notes }: { title: string; notes: string[] }) {
+function NoteBlock({
+  title,
+  subtitle,
+  notes,
+  accent,
+}: {
+  title: string;
+  subtitle: string;
+  notes: string[];
+  accent: string;
+}) {
   return (
-    <div className="space-y-2">
-      <h3 className="text-xs text-neutral-500">{title}</h3>
-      <ul className="space-y-1 text-sm text-neutral-800">
+    <div className="space-y-3 border-t pt-4" style={{ borderColor: accent }}>
+      <div>
+        <p
+          className="font-garamond text-[10px] tracking-[0.4em]"
+          style={{ color: accent }}
+        >
+          {title.toUpperCase()}
+        </p>
+        <p className="font-mincho text-xs text-neutral-400">{subtitle}</p>
+      </div>
+      <ul className="space-y-1 font-mincho text-sm text-neutral-800">
         {notes.map((n) => (
-          <li key={n}>・{n}</li>
+          <li key={n}>{n}</li>
         ))}
       </ul>
     </div>
   );
 }
 
-function Meta({ title, value }: { title: string; value: string }) {
+function Meta({
+  label,
+  value,
+  html,
+}: {
+  label: string;
+  value: string;
+  html?: boolean;
+}) {
   return (
     <div className="space-y-1">
-      <p className="text-xs text-neutral-500">{title}</p>
-      <p className="text-sm text-neutral-800">{value}</p>
+      <p className="font-garamond text-[9px] tracking-[0.4em] text-neutral-400">
+        {label}
+      </p>
+      {html ? (
+        <p
+          className="text-neutral-800"
+          dangerouslySetInnerHTML={{ __html: value }}
+        />
+      ) : (
+        <p className="font-mincho text-sm text-neutral-800">{value}</p>
+      )}
     </div>
   );
 }
 
-function renderBar(v: number): string {
-  return "●".repeat(v) + "○".repeat(Math.max(0, 5 - v));
+function renderBar(v: number, color: string): string {
+  const filled = Array.from({ length: v })
+    .map(
+      () =>
+        `<span style="display:inline-block;width:14px;height:2px;background:${color};margin-right:4px;vertical-align:middle"></span>`,
+    )
+    .join("");
+  const empty = Array.from({ length: Math.max(0, 5 - v) })
+    .map(
+      () =>
+        `<span style="display:inline-block;width:14px;height:2px;background:#ddd;margin-right:4px;vertical-align:middle"></span>`,
+    )
+    .join("");
+  return filled + empty;
 }

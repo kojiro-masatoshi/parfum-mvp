@@ -15,6 +15,8 @@ const config: Config = {
       },
       fontFamily: {
         sans: ["'Noto Sans JP'", "system-ui", "sans-serif"],
+        mincho: ["'Shippori Mincho'", "'Noto Serif JP'", "serif"],
+        garamond: ["'Cormorant Garamond'", "'Shippori Mincho'", "serif"],
       },
     },
   },

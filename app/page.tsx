@@ -2,38 +2,72 @@ import Link from "next/link";
 
 export default function Home() {
   return (
-    <main className="space-y-10">
-      <header className="space-y-3 pt-6">
-        <p className="text-xs tracking-[0.3em] text-accent">PARFUM MVP</p>
-        <h1 className="text-3xl font-light leading-tight sm:text-4xl">
+    <div className="space-y-16 fade-up">
+      <section className="space-y-8 text-center">
+        <p className="font-garamond text-[11px] tracking-[0.5em] text-accent">
+          A SCENT FOR YOU
+        </p>
+        <h1 className="font-mincho text-4xl font-light leading-[1.5] sm:text-5xl">
           生活のリズムから、
           <br />
-          あなたに馴染む香水を。
+          あなたに馴染む香を。
         </h1>
-        <p className="text-sm leading-relaxed text-neutral-600">
+        <div className="mx-auto h-px w-16 bg-[var(--rule)]" />
+        <p className="mx-auto max-w-md text-sm leading-[2.1] text-neutral-600">
           食生活、肌質、代謝、そして日々のシーン。
           <br />
-          8つの問いに答えるだけで、相性の良い香りを5本ご提案します。
+          九つの問いに答えるだけで、
+          <br />
+          あなたの輪郭に寄り添う香りを、五本ご提案します。
         </p>
-      </header>
-
-      <section className="space-y-4 rounded-md border border-neutral-200 bg-neutral-50 p-6">
-        <h2 className="text-sm font-medium text-neutral-700">このアプリについて</h2>
-        <ul className="space-y-2 text-sm leading-relaxed text-neutral-600">
-          <li>・外部APIを一切使わず、ローカルのルールベースで完結します。</li>
-          <li>・提案にはそれぞれ「なぜ選ばれたか」の理由が付きます。</li>
-          <li>・所要時間は約2〜3分です。</li>
-        </ul>
       </section>
 
-      <div className="flex justify-center pt-4">
+      <section className="grid grid-cols-1 gap-6 sm:grid-cols-3">
+        <Pillar
+          label="01"
+          title="九つの、問い"
+          body="日々の食、肌の感触、季節の過ごし方。あなたの輪郭をたどります。"
+        />
+        <Pillar
+          label="02"
+          title="理由まで、言葉に"
+          body="一本ずつに、なぜあなたに似合うのか。短い理由を添えて。"
+        />
+        <Pillar
+          label="03"
+          title="ノートの、解剖"
+          body="トップ、ハート、ベース。香りの構造まで、静かに覗きに。"
+        />
+      </section>
+
+      <div className="flex justify-center">
         <Link
           href="/diagnosis"
-          className="rounded-full bg-accent px-10 py-3 text-sm font-medium text-white transition hover:bg-accent-soft"
+          className="rounded-full border border-accent px-12 py-4 font-mincho text-sm tracking-[0.3em] text-accent transition hover:bg-accent hover:text-white"
         >
-          診断を始める
+          診断をはじめる
         </Link>
       </div>
-    </main>
+    </div>
+  );
+}
+
+function Pillar({
+  label,
+  title,
+  body,
+}: {
+  label: string;
+  title: string;
+  body: string;
+}) {
+  return (
+    <div className="space-y-2 border-t rule pt-4">
+      <p className="font-garamond text-[10px] tracking-[0.4em] text-neutral-400">
+        {label}
+      </p>
+      <h3 className="font-mincho text-base">{title}</h3>
+      <p className="text-xs leading-[1.9] text-neutral-600">{body}</p>
+    </div>
   );
 }

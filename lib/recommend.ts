@@ -1,4 +1,5 @@
 import type {
+  BudgetRange,
   DiagnosisAnswers,
   MBTI,
   Perfume,
@@ -7,7 +8,7 @@ import type {
   ScentFamily,
 } from "./types";
 
-// --- スコア計算: 合計 100 点満点 ---
+// --- スコア計算: 100点を上限に、要素の合計は最大120 ---
 const MAX_SCORES = {
   skinConcentration: 25,
   metabolismIntensity: 15,
@@ -16,6 +17,7 @@ const MAX_SCORES = {
   preference: 20,
   gender: 10,
   mbti: 10,
+  budget: 15,
 } as const;
 
 // 好み回答 → 相性の良い系統
@@ -151,6 +153,37 @@ function scoreMbti(p: Perfume, a: DiagnosisAnswers): number {
   return families.includes(p.scent_family) ? 10 : 3;
 }
 
+// 価格帯ラベル → ランク 0/1/2
+function budgetRank(b: BudgetRange): number | null {
+  switch (b) {
+    case "〜¥15,000":
+      return 0;
+    case "¥15,000〜¥30,000":
+      return 1;
+    case "¥30,000〜":
+      return 2;
+    case "こだわらない":
+      return null;
+  }
+}
+
+function priceRank(yen: number): number {
+  if (yen < 15000) return 0;
+  if (yen < 30000) return 1;
+  return 2;
+}
+
+function scoreBudget(p: Perfume, a: DiagnosisAnswers): number {
+  if (!a.budget) return 8;
+  const want = budgetRank(a.budget);
+  if (want === null) return 8; // こだわらない → 中立
+  const actual = priceRank(p.price_yen);
+  const diff = Math.abs(want - actual);
+  if (diff === 0) return 15;
+  if (diff === 1) return 8;
+  return 0;
+}
+
 export function scorePerfume(p: Perfume, a: DiagnosisAnswers): number {
   const total =
     scoreSkinConcentration(p, a) +
@@ -159,7 +192,8 @@ export function scorePerfume(p: Perfume, a: DiagnosisAnswers): number {
     scoreScene(p, a) +
     scorePreference(p, a) +
     scoreGender(p, a) +
-    scoreMbti(p, a);
+    scoreMbti(p, a) +
+    scoreBudget(p, a);
   return Math.min(100, total);
 }
 
@@ -197,8 +231,16 @@ function buildReasons(p: Perfume, a: DiagnosisAnswers): string[] {
     reasons.push("香りの立ち上がりがゆっくりな方に、しっかりとした主張がちょうど良く届きます。");
   }
 
-  if (a.mbti !== "わからない" && MBTI_FAMILY_MAP[a.mbti].includes(p.scent_family)) {
+  if (a.mbti !== "わからない" && MBTI_FAMILY_MAP[a.mbti]?.includes(p.scent_family)) {
     reasons.push(`${a.mbti}タイプの印象と響き合う${p.scent_family}の輪郭。`);
+  }
+
+  if (a.budget && a.budget !== "こだわらない") {
+    const want = budgetRank(a.budget);
+    const actual = priceRank(p.price_yen);
+    if (want !== null && want === actual) {
+      reasons.push(`ご希望の価格帯（${a.budget}）にも収まる一本です。`);
+    }
   }
 
   if (reasons.length === 0) {

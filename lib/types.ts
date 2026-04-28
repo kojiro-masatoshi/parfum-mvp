@@ -48,6 +48,12 @@ export type Preference =
   | "清潔感のある石鹸系"
   | "個性的・独特";
 
+export type BudgetRange =
+  | "〜¥15,000"
+  | "¥15,000〜¥30,000"
+  | "¥30,000〜"
+  | "こだわらない";
+
 export type MBTI =
   | "INTJ" | "INTP" | "ENTJ" | "ENTP"
   | "INFJ" | "INFP" | "ENFJ" | "ENFP"
@@ -63,6 +69,7 @@ export interface DiagnosisAnswers {
   metabolism: MetabolismLevel;
   scenes: Scene[];
   preferences: Preference[];
+  budget: BudgetRange;
   mbti: MBTI;
 }
 

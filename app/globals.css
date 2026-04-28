@@ -2,11 +2,14 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url("https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&display=swap");
+/* フォントは next/font/google によりビルド時にセルフホスト。ランタイムの外部通信は発生しません。 */
 
 :root {
   --foreground: #1a1a1a;
-  --background: #ffffff;
+  --foreground-soft: #555;
+  --foreground-faint: #8a8a8a;
+  --background: #fafaf7; /* 紙の白 */
+  --rule: #e5e1d8;
   --accent: #4a148c;
 }
 
@@ -17,6 +20,48 @@ body {
 }
 
 body {
-  font-family: "Noto Sans JP", system-ui, sans-serif;
+  font-family: var(--font-noto-sans-jp), system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
+  letter-spacing: 0.01em;
+}
+
+.font-mincho {
+  font-family: var(--font-shippori-mincho), serif;
+  letter-spacing: 0.04em;
+}
+
+.font-garamond {
+  font-family: var(--font-cormorant), var(--font-shippori-mincho), serif;
+  font-weight: 400;
+  letter-spacing: 0.06em;
+}
+
+.rule {
+  border-color: var(--rule);
+}
+
+.vertical-rule::before {
+  content: "";
+  display: inline-block;
+  width: 1px;
+  height: 1em;
+  background: var(--rule);
+  margin: 0 0.75em;
+  vertical-align: -0.15em;
+}
+
+/* 控えめなフェードイン */
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-up {
+  animation: fade-up 0.6s ease-out both;
 }

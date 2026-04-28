@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import type {
   AgeGroup,
+  BudgetRange,
   DiagnosisAnswers,
   DietType,
   Gender,
@@ -56,6 +57,12 @@ type Question =
       label: string;
       type: "multi";
       options: readonly Preference[];
+    }
+  | {
+      key: "budget";
+      label: string;
+      type: "single";
+      options: readonly BudgetRange[];
     }
   | {
       key: "mbti";
@@ -112,6 +119,17 @@ const QUESTIONS: readonly Question[] = [
       "スパイシー",
       "清潔感のある石鹸系",
       "個性的・独特",
+    ] as const,
+  },
+  {
+    key: "budget",
+    label: "考えている価格帯は？",
+    type: "single",
+    options: [
+      "〜¥15,000",
+      "¥15,000〜¥30,000",
+      "¥30,000〜",
+      "こだわらない",
     ] as const,
   },
   {
@@ -193,25 +211,27 @@ export default function DiagnosisPage() {
   }
 
   return (
-    <main className="space-y-8 pt-4">
-      <div>
-        <div className="mb-2 flex items-center justify-between text-xs text-neutral-500">
+    <div className="space-y-10 fade-up" key={index}>
+      <div className="space-y-3">
+        <div className="flex items-center justify-between font-garamond text-[10px] tracking-[0.4em] text-neutral-400">
           <span>
-            Q{index + 1} / {QUESTIONS.length}
+            QUESTION {String(index + 1).padStart(2, "0")} / {String(QUESTIONS.length).padStart(2, "0")}
           </span>
           <span>{progress}%</span>
         </div>
-        <div className="h-1 w-full overflow-hidden rounded-full bg-neutral-100">
+        <div className="h-px w-full bg-[var(--rule)]">
           <div
-            className="h-full bg-accent transition-all"
+            className="h-full bg-accent transition-all duration-500"
             style={{ width: `${progress}%` }}
           />
         </div>
       </div>
 
-      <h2 className="text-xl font-medium leading-relaxed">{q.label}</h2>
+      <h2 className="font-mincho text-2xl leading-[1.7] sm:text-3xl">
+        {q.label}
+      </h2>
 
-      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         {q.options.map((opt) => {
           const selected =
             q.type === "multi"
@@ -227,40 +247,46 @@ export default function DiagnosisPage() {
                   : setSingle(q.key, opt)
               }
               className={[
-                "rounded-md border px-4 py-3 text-left text-sm transition",
+                "rounded-sm border px-5 py-4 text-left text-sm transition",
                 selected
-                  ? "border-accent bg-accent/5 text-accent"
-                  : "border-neutral-200 text-neutral-700 hover:border-neutral-400",
+                  ? "border-accent bg-accent/[0.04] text-accent"
+                  : "border-[var(--rule)] bg-white text-neutral-700 hover:border-neutral-500",
               ].join(" ")}
             >
-              {opt}
+              <span className="font-mincho">{opt}</span>
             </button>
           );
         })}
       </div>
 
-      <div className="flex items-center justify-between pt-6">
+      {q.type === "multi" && (
+        <p className="text-[11px] tracking-[0.15em] text-neutral-400">
+          ※ 複数選択できます
+        </p>
+      )}
+
+      <div className="flex items-center justify-between border-t rule pt-6">
         <button
           type="button"
           onClick={() => setIndex(Math.max(0, index - 1))}
           disabled={index === 0 || submitting}
-          className="text-sm text-neutral-500 disabled:opacity-30"
+          className="font-garamond text-xs tracking-[0.3em] text-neutral-500 disabled:opacity-30"
         >
-          ← 戻る
+          ← BACK
         </button>
         <button
           type="button"
           onClick={onNext}
           disabled={!isAnswered || submitting}
-          className="rounded-full bg-accent px-8 py-3 text-sm font-medium text-white transition hover:bg-accent-soft disabled:opacity-40"
+          className="rounded-full border border-accent px-10 py-3 font-mincho text-sm tracking-[0.2em] text-accent transition hover:bg-accent hover:text-white disabled:border-neutral-300 disabled:text-neutral-300 disabled:hover:bg-transparent"
         >
           {submitting
-            ? "診断中..."
+            ? "診断中…"
             : index < QUESTIONS.length - 1
-              ? "次へ"
+              ? "次 へ"
               : "結果を見る"}
         </button>
       </div>
-    </main>
+    </div>
   );
 }

@@ -68,6 +68,7 @@ function mkAnswers(o: Partial<DiagnosisAnswers> = {}): DiagnosisAnswers {
     metabolism: "普通",
     scenes: [],
     preferences: [],
+    budget: "こだわらない",
     mbti: "わからない",
     ...o,
   };
@@ -148,5 +149,20 @@ describe("recommend", () => {
     });
     const result = recommend(basePerfumes, a, 1);
     expect(result[0].perfume.id).toBe("gourmand-sweet");
+  });
+
+  it("予算 〜¥15,000 は近い価格の商品を押し上げる", () => {
+    // citrus-light: 8000円, woody-strong: 15000円, gourmand-sweet: 12000円
+    // 「〜¥15,000」では 8000/12000 が直撃、15000 は境界で rank 1 扱い
+    const cheap = basePerfumes[1]; // 8000
+    const mid = basePerfumes[2]; // 12000
+    const high = basePerfumes[0]; // 15000 → rank 1
+
+    const a = mkAnswers({ budget: "〜¥15,000" });
+    const cheapScore = scorePerfume(cheap, a);
+    const midScore = scorePerfume(mid, a);
+    const highScore = scorePerfume(high, a);
+    expect(cheapScore).toBeGreaterThan(highScore);
+    expect(midScore).toBeGreaterThan(highScore);
   });
 });
