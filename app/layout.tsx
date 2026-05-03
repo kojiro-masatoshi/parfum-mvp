@@ -26,7 +26,7 @@ const cormorant = Cormorant_Garamond({
 });
 
 export const metadata: Metadata = {
-  title: "Parfum MVP — 香水レコメンド",
+  title: "ÉLAN — 香水レコメンド",
   description: "生活習慣と属性の診断から、あなたに相性のよい香水を提案します。",
 };
 
@@ -42,19 +42,19 @@ export default function RootLayout({
     >
       <body className="min-h-screen bg-[var(--background)] text-[var(--foreground)]">
         <div className="mx-auto max-w-3xl px-6">
-          <header className="flex items-center justify-between border-b rule py-5">
+          <header className="flex items-center justify-between py-6">
             <Link
               href="/"
               className="font-garamond text-lg tracking-[0.35em] text-neutral-800"
             >
-              PARFUM
+              ÉLAN
             </Link>
             <span className="font-garamond text-[10px] tracking-[0.4em] text-neutral-400">
               VOL. 01 · DIAGNOSIS
             </span>
           </header>
-          <main className="py-10">{children}</main>
-          <footer className="border-t rule py-6 text-center font-garamond text-[10px] tracking-[0.4em] text-neutral-400">
+          <main className="pb-16 pt-6">{children}</main>
+          <footer className="py-10 text-center font-garamond text-[10px] tracking-[0.4em] text-neutral-400">
             — FIN —
           </footer>
         </div>
