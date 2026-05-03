@@ -9,7 +9,7 @@
   --foreground-soft: #555;
   --foreground-faint: #8a8a8a;
   --background: #fafaf7; /* 紙の白 */
-  --rule: #e5e1d8;
+  --hairline: rgba(74, 20, 140, 0.12); /* accent 12%（極淡パープル） */
   --accent: #4a148c;
 }
 
@@ -23,6 +23,7 @@ body {
   font-family: var(--font-noto-sans-jp), system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   letter-spacing: 0.01em;
+  overflow-x: clip; /* w-screen ヒーローで生じる scrollbar 幅分の横スクロールを抑止 */
 }
 
 .font-mincho {
@@ -36,16 +37,12 @@ body {
   letter-spacing: 0.06em;
 }
 
-.rule {
-  border-color: var(--rule);
-}
-
 .vertical-rule::before {
   content: "";
   display: inline-block;
   width: 1px;
   height: 1em;
-  background: var(--rule);
+  background: var(--hairline);
   margin: 0 0.75em;
   vertical-align: -0.15em;
 }
@@ -64,4 +61,44 @@ body {
 
 .fade-up {
   animation: fade-up 0.6s ease-out both;
+}
+
+@keyframes intro-breathe {
+  0% {
+    opacity: 0;
+    letter-spacing: 0.2em;
+  }
+  35% {
+    opacity: 1;
+    letter-spacing: 0.08em;
+  }
+  70% {
+    opacity: 1;
+    letter-spacing: 0.08em;
+  }
+  100% {
+    opacity: 0;
+    letter-spacing: 0.16em;
+  }
+}
+
+.intro-breathe {
+  animation: intro-breathe 1.8s ease-in-out both;
+}
+
+@keyframes intro-line {
+  0% {
+    transform: scaleX(0);
+  }
+  50% {
+    transform: scaleX(1);
+  }
+  100% {
+    transform: scaleX(0);
+  }
+}
+
+.intro-line {
+  transform-origin: center;
+  animation: intro-line 1.8s ease-in-out both;
 }

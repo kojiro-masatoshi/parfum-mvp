@@ -191,17 +191,20 @@ export default function DiagnosisPage() {
   async function submit() {
     setSubmitting(true);
     try {
-      const res = await fetch("/api/recommend", {
+      const minHold = new Promise((resolve) => setTimeout(resolve, 400));
+      const fetchPromise = fetch("/api/recommend", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(answers),
       });
+      const [res] = await Promise.all([fetchPromise, minHold]);
       if (!res.ok) throw new Error("recommend failed");
       const data = await res.json();
       sessionStorage.setItem(
         "parfum:lastResult",
         JSON.stringify({ answers, recommendations: data.recommendations }),
       );
+      sessionStorage.setItem("parfum:freshResult", "1");
       router.push("/result");
     } catch (e) {
       console.error(e);
@@ -219,7 +222,7 @@ export default function DiagnosisPage() {
           </span>
           <span>{progress}%</span>
         </div>
-        <div className="h-px w-full bg-[var(--rule)]">
+        <div className="h-px w-full bg-accent/10">
           <div
             className="h-full bg-accent transition-all duration-500"
             style={{ width: `${progress}%` }}
@@ -247,10 +250,10 @@ export default function DiagnosisPage() {
                   : setSingle(q.key, opt)
               }
               className={[
-                "rounded-sm border px-5 py-4 text-left text-sm transition",
+                "rounded-sm px-5 py-4 text-left text-sm transition",
                 selected
-                  ? "border-accent bg-accent/[0.04] text-accent"
-                  : "border-[var(--rule)] bg-white text-neutral-700 hover:border-neutral-500",
+                  ? "bg-accent/[0.06] text-accent ring-1 ring-accent/30"
+                  : "bg-white text-neutral-700 hover:bg-accent/[0.03] hover:text-accent/80",
               ].join(" ")}
             >
               <span className="font-mincho">{opt}</span>
@@ -265,7 +268,7 @@ export default function DiagnosisPage() {
         </p>
       )}
 
-      <div className="flex items-center justify-between border-t rule pt-6">
+      <div className="flex items-center justify-between pt-8">
         <button
           type="button"
           onClick={() => setIndex(Math.max(0, index - 1))}

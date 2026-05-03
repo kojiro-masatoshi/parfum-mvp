@@ -12,7 +12,7 @@ export default function Home() {
           <br />
           あなたに馴染む香を。
         </h1>
-        <div className="mx-auto h-px w-16 bg-[var(--rule)]" />
+        <div className="mx-auto h-px w-16 bg-accent/30" />
         <p className="mx-auto max-w-md text-sm leading-[2.1] text-neutral-600">
           食生活、肌質、代謝、そして日々のシーン。
           <br />
@@ -62,7 +62,8 @@ function Pillar({
   body: string;
 }) {
   return (
-    <div className="space-y-2 border-t rule pt-4">
+    <div className="space-y-3 pt-1">
+      <span className="block h-px w-6 bg-accent" />
       <p className="font-garamond text-[10px] tracking-[0.4em] text-neutral-400">
         {label}
       </p>

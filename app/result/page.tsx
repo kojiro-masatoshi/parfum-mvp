@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { themeOf } from "@/lib/scent-theme";
+import { meshGradientFor, themeOf } from "@/lib/scent-theme";
 import type { DiagnosisAnswers, Recommendation } from "@/lib/types";
 
 interface StoredResult {
@@ -10,9 +10,12 @@ interface StoredResult {
   recommendations: Recommendation[];
 }
 
+type Phase = "intro" | "reveal";
+
 export default function ResultPage() {
   const [data, setData] = useState<StoredResult | null>(null);
   const [loaded, setLoaded] = useState(false);
+  const [phase, setPhase] = useState<Phase>("reveal");
 
   useEffect(() => {
     const raw = sessionStorage.getItem("parfum:lastResult");
@@ -23,10 +26,36 @@ export default function ResultPage() {
         // ignore
       }
     }
+    // 診断直後の遷移時のみイントロを再生
+    const fresh = sessionStorage.getItem("parfum:freshResult");
+    if (fresh) {
+      sessionStorage.removeItem("parfum:freshResult");
+      setPhase("intro");
+    }
     setLoaded(true);
   }, []);
 
+  useEffect(() => {
+    if (phase !== "intro") return;
+    const t = setTimeout(() => setPhase("reveal"), 1800);
+    return () => clearTimeout(t);
+  }, [phase]);
+
   if (!loaded) return null;
+
+  if (data && phase === "intro") {
+    return (
+      <div className="flex min-h-[60vh] flex-col items-center justify-center space-y-6 text-center">
+        <p className="font-garamond text-[10px] tracking-[0.5em] text-neutral-400 intro-breathe">
+          SELECTING…
+        </p>
+        <p className="font-mincho text-xl text-neutral-700 intro-breathe">
+          あなたの輪郭を、辿っています。
+        </p>
+        <div className="h-px w-24 bg-accent intro-line" />
+      </div>
+    );
+  }
 
   if (!data) {
     return (
@@ -45,15 +74,15 @@ export default function ResultPage() {
   }
 
   return (
-    <div className="space-y-12 fade-up">
-      <header className="space-y-4 text-center">
+    <div className="space-y-12">
+      <header className="space-y-4 text-center fade-up">
         <p className="font-garamond text-[11px] tracking-[0.5em] text-accent">
           YOUR SELECTION
         </p>
         <h1 className="font-mincho text-3xl font-light sm:text-4xl">
           あなたに似合う、五本。
         </h1>
-        <div className="mx-auto h-px w-12 bg-[var(--rule)]" />
+        <div className="mx-auto h-px w-12 bg-accent/30" />
         <p className="text-xs leading-[2] text-neutral-500">
           スコア順に、そして理由とともに。
         </p>
@@ -65,13 +94,23 @@ export default function ResultPage() {
           return (
             <li
               key={r.perfume.id}
-              className="relative overflow-hidden rounded-sm border border-[var(--rule)] bg-white transition hover:shadow-[0_1px_0_rgba(0,0,0,0.05)]"
-              style={{ borderLeftColor: theme.accent, borderLeftWidth: 3 }}
+              className="fade-up relative overflow-hidden rounded-sm bg-white transition"
+              style={{
+                boxShadow: `inset 3px 0 0 ${theme.accent}`,
+                animationDelay: `${i * 110}ms`,
+              }}
             >
               <div
-                className="pointer-events-none absolute inset-y-0 right-0 w-1/3 opacity-60"
+                className="pointer-events-none absolute inset-y-0 right-0 w-[60%]"
                 style={{
-                  background: `linear-gradient(270deg, ${theme.tint} 0%, transparent 100%)`,
+                  background: meshGradientFor(theme, r.perfume.id),
+                  filter: "blur(18px)",
+                  transform: "scale(1.08)",
+                  WebkitMaskImage:
+                    "linear-gradient(270deg, black 50%, transparent 100%)",
+                  maskImage:
+                    "linear-gradient(270deg, black 50%, transparent 100%)",
+                  opacity: 0.9,
                 }}
               />
               <div className="relative flex items-start gap-6 p-6">
@@ -148,7 +187,10 @@ export default function ResultPage() {
         })}
       </ul>
 
-      <div className="flex justify-center pt-4">
+      <div
+        className="fade-up flex justify-center pt-4"
+        style={{ animationDelay: `${data.recommendations.length * 110 + 80}ms` }}
+      >
         <Link
           href="/diagnosis"
           className="font-garamond text-[11px] tracking-[0.3em] text-neutral-500 underline-offset-4 hover:underline"
