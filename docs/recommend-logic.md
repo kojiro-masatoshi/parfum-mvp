@@ -184,6 +184,46 @@ score = min(100, total)
 
 > 上から順に `push` し最後に **先頭 2 件のみ採用**するため、肌質・シーンの理由が優先表示されやすい。スコア順とは無関係。
 
+## 香水データの出所
+
+レコメンド対象の `Perfume[]` は **完全にローカル完結**で、外部 API には依存しない（CLAUDE.md の「外部APIへの新規依存追加は禁止」に対応）。
+
+```
+data/seed.ts (26件のハードコード)
+       │
+       │ npm run seed   (INSERT OR REPLACE)
+       ▼
+data/perfume.db (SQLite, better-sqlite3)
+       │
+       │ getAllPerfumes() / getPerfumeById()  (lib/db.ts)
+       ▼
+recommend() / 詳細ページ
+```
+
+### マスタ定義 — `data/seed.ts`
+
+- 26 本の `Perfume` オブジェクトを直書き（メンズ寄り 6 / レディース寄り 6 / ユニセックス 8 + ニッチ）
+- 全 8 系統（`ScentFamily`）を最低 1 本ずつカバー
+- `description` は短い情景描写（編集体裁の都合で）
+- 配列フィールド（`top_notes` / `middle_notes` / `base_notes` / `season_tags` / `scene_tags`）は文字列配列
+
+### 永続化 — `data/perfume.db`
+
+- スキーマは `lib/db.ts:22-50` の `initSchema` が起動時に `IF NOT EXISTS` で作成
+- 配列フィールドは `JSON.stringify` で TEXT 列に格納し、`rowToPerfume` 内で `JSON.parse` で復元
+- `journal_mode = WAL`
+- DB ファイル自体は git 管理されており、`npm run seed` を回さなくても初期状態で動く
+
+### 更新の流れ
+
+| 操作 | 手順 |
+|------|------|
+| 追加 | `data/seed.ts` の `perfumes` 配列に 1 件追記 → `npm run seed` |
+| 更新 | 同じ `id` のエントリを書き換え → `npm run seed`（`INSERT OR REPLACE` で上書き） |
+| 削除 | seed では不可。DB に対する手動 SQL が必要 |
+
+> **注意**: seed.ts は `INSERT OR REPLACE` のみで、差分 DELETE をしない。seed.ts から行を消しても `data/perfume.db` には残り続ける。
+
 ## API レイヤー
 
 `POST /api/recommend`（`app/api/recommend/route.ts`）
